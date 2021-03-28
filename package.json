@@ -1,0 +1,32 @@
+{
+  "name": "tankgame2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc --removeComments --module commonjs --target ES5 --outDir build src/server.ts",
+    "run": "node build/server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomcola512/tankgame2.git"
+  },
+  "keywords": [
+    "bonk"
+  ],
+  "author": "tom and alec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tomcola512/tankgame2/issues"
+  },
+  "homepage": "https://github.com/tomcola512/tankgame2#readme",
+  "dependencies": {
+    "uuid": "^8.3.2",
+    "ws": "^7.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "@types/ws": "^7.4.0"
+  }
+}
