@@ -5,9 +5,8 @@ interface Message {
 
 export class UserMessage implements Message {
     private data: { name: string, message: string };
-    constructor(payload: string) {
-        const {name, message} = JSON.parse(payload);
-        this.data = {name, message};
+    constructor(name: string, message: string) {
+        this.data = { name, message };
     }
 
     get name(): string {
