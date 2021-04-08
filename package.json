@@ -13,7 +13,6 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "file:./react-scripts-fork",
-    "the-websocket-server": "file:./server/server",
     "typescript": "^4.2.4",
     "web-vitals": "^1.1.1"
   },

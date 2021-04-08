@@ -29,6 +29,7 @@ fs.writeFileSync(
     JSON.stringify({DRIVER_UUID, GUNNER_UUID}
 ));
 
+// OLD COPY
 const buildClient = (name = 'bob', uuid = DRIVER_UUID, {target = 'ws://localhost:8878'} = {}) => {
     const socket = new WebSocket(target);
     const authenticate = msg => ({...msg, token: uuid});
