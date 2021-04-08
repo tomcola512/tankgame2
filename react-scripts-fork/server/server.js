@@ -1,10 +1,11 @@
 // import http = require('http');
-import WebSocket = require('ws');
-import uuid = require('uuid');
-import models = require('./models');
+const WebSocket = require('ws');
+const uuid = require('uuid');
+const models = require('./models');
+const fs = require('fs');
+const path = require('path');
 
-
-const port: number = parseInt(process.env.PORT) || 8878;
+const port = parseInt(process.env.WS_PORT) || 8878;
 // const server = http.createServer();
 const wss = new WebSocket.Server({
     // noServer: true
@@ -21,6 +22,12 @@ const GUNNER_UUID = uuid.v4();
 console.log("GUNNER UUID = ");
 console.log(GUNNER_UUID);
 console.log();
+
+const logPath = path.join(__dirname, '..', '..', 'DEV_SERVER_USER_CREDS.txt');
+fs.writeFileSync(
+    logPath,
+    JSON.stringify({DRIVER_UUID, GUNNER_UUID}
+));
 
 const buildClient = (name = 'bob', uuid = DRIVER_UUID, {target = 'ws://localhost:8878'} = {}) => {
     const socket = new WebSocket(target);
@@ -51,7 +58,7 @@ const setupWebSocket = ws => {
                 ws.close();
                 return;
             }
-            const userMessage: models.UserMessage = new models.UserMessage(name, message);
+            const userMessage = new models.UserMessage(name, message);
             broadcast(JSON.stringify(userMessage));
         } catch (e) {
             console.log("ERROR LMAO");
@@ -72,7 +79,7 @@ wss.on('connection', setupWebSocket);
 
 setInterval(() => broadcast("BEEP"), 1337);
 
-const broadcast = (data: string): void => {
+const broadcast = (data) => {
     wss.clients.forEach(client => {
         client.send(data);
     });

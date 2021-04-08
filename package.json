@@ -1,32 +1,44 @@
 {
   "name": "tankgame2",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "tsc",
-    "run": "node build/server"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tomcola512/tankgame2.git"
-  },
-  "keywords": [
-    "bonk"
-  ],
-  "author": "tom and alec",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/tomcola512/tankgame2/issues"
-  },
-  "homepage": "https://github.com/tomcola512/tankgame2#readme",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
-    "uuid": "^8.3.2",
-    "ws": "^7.4.4"
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^12.20.7",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "file:./react-scripts-fork",
+    "the-websocket-server": "file:./server/server",
+    "typescript": "^4.2.4",
+    "web-vitals": "^1.1.1"
   },
-  "devDependencies": {
-    "@types/node": "^14.14.37",
-    "@types/ws": "^7.4.0"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
