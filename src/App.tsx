@@ -67,7 +67,7 @@ function App() {
           <div style={{ gridArea: 'GAME', backgroundColor: 'black', color: 'green' }}>
             I AM DA GAME
           </div>
-          <div style={{ gridArea: 'CHATLOG', overflowY: 'auto', borderLeft: '1px solid red' }}>
+          <div style={{ gridArea: 'CHATLOG', overflowY: 'auto', borderLeft: '1px solid red', wordBreak: 'break-all' }}>
             {chatLog.map(({ name, message }) => <div>{name}: {message}</div>)}
           </div>
           <form style={{ gridArea: 'INPUT', border: '1px solid red' }} onSubmit={formSubmit}>
