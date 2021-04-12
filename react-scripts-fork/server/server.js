@@ -53,13 +53,13 @@ const setupWebSocket = ws => {
     ws.on('message', event => {
         console.log("HANDLING MESSAGE");
         try {
-            const { token, name, message } = JSON.parse(event.toString());
+            const { token, type, name, payload } = JSON.parse(event.toString());
             if(token != DRIVER_UUID && token != GUNNER_UUID) {
                 // you mean there's a better way?
                 ws.close();
                 return;
             }
-            const userMessage = new models.UserMessage(name, message);
+            const userMessage = new models.UserMessage(type, name, payload);
             broadcast(JSON.stringify(userMessage));
         } catch (e) {
             console.log("ERROR LMAO");

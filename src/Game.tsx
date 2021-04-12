@@ -1,7 +1,14 @@
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+
+import SocketContext from './SocketContext';
+
+
 export const Game = () => {
-    return <>
-    Wow what a cool game!
-    </>;
+    const socketContext = useContext(SocketContext);
+
+    return <div style={{ gridArea: 'GAME', backgroundColor: 'black', color: 'green' }}>
+              Wow what a cool game!
+            </div>;
 }
 
 export default Game;

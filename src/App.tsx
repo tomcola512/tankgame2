@@ -1,9 +1,7 @@
 import React, { useCallback, useState } from 'react';
-
-interface SocketWrapper {
-  sendMessage(message: String): void
-  addMessageHandler(messageHandler: (message: MessageEvent<any>) => void): void
-}
+import SocketContext, { SocketWrapper, TG2Event } from './SocketContext';
+import Chat from './Chat';
+import Game from './Game';
 
 function App() {
   const [name, setName] = useState("");
@@ -12,34 +10,10 @@ function App() {
   const [chatLog, setChatLog] = useState([] as any[]);
 
   const [webSocket, setWebSocket] = useState({} as SocketWrapper);
-
-  const appendMessageToChatLog = useCallback(message => {
-    setChatLog(prior => [...prior, JSON.parse(message.data).data])
-  }, [chatLog, setChatLog]);
   const submit = useCallback(() => {
     const socket = buildClient(name, uuid);
-    socket.addMessageHandler(appendMessageToChatLog)
     setWebSocket(socket);
   }, [name, uuid, chatLog]);
-
-  const [message, setMessage] = useState("");
-  const submitMessage = useCallback(() => {
-    if(message === "") {
-      return;
-    }
-    try {
-      webSocket.sendMessage(message);
-      setMessage("");
-    } catch (e) {
-      debugger;
-    }
-  }, [webSocket, message, setMessage])
-
-  const formSubmit = useCallback((e) => {
-    submitMessage();
-    e.preventDefault();
-    return false;
-  }, [webSocket, message, setMessage])
   return (
     <div className="App">
       {Object.keys(webSocket).length == 0
@@ -48,61 +22,77 @@ function App() {
           <div>ENTER NAME: <input onChange={(event) => setName(event.target.value)}></input></div>
           <div><button onClick={submit}>LOGIN</button></div>
         </>
-        : <div style={{
-          height: '100%',
-          width: '100%',
-          position: 'absolute',
-          display: 'grid',
-          grid: `
-          'TITLE CHATLOG'
-          'GAME CHATLOG'
-          'GAME INPUT'
-        `,
-        gridTemplateRows: 'min-content 1fr min-content',
-          gridTemplateColumns: '1fr min-content'
-        }}>
-          <div style={{ gridArea: 'TITLE', backgroundColor: 'white', color: 'red' }}>
-            I AM DA TITLE
+        :
+        <SocketContext.Provider value={webSocket}>
+          <div style={{
+            height: '100%',
+            width: '100%',
+            position: 'absolute',
+            display: 'grid',
+            grid: `
+            'TITLE CHATLOG'
+            'GAME CHATLOG'
+            'GAME INPUT'
+          `,
+            gridTemplateRows: 'min-content 1fr min-content',
+            gridTemplateColumns: '1fr min-content',
+            overflow: 'hidden'
+          }}>
+            <div style={{ gridArea: 'TITLE', backgroundColor: 'white', color: 'red' }}>
+              TANKGAME 2
+            </div>
+            <Game />
+            <Chat />
           </div>
-          <div style={{ gridArea: 'GAME', backgroundColor: 'black', color: 'green' }}>
-            I AM DA GAME
-          </div>
-          <div style={{ gridArea: 'CHATLOG', overflowY: 'auto', borderLeft: '1px solid red', wordBreak: 'break-all' }}>
-            {chatLog.map(({ name, message }) => <div>{name}: {message}</div>)}
-          </div>
-          <form style={{ gridArea: 'INPUT', border: '1px solid red' }} onSubmit={formSubmit}>
-            <input
-              className='chatInput'
-              onChange={(event) => setMessage(event.target.value)}
-              value={message}
-            ></input>
-            <button type="submit">SUBMIT</button>
-          </form>
-        </div>
+        </SocketContext.Provider>
       }
     </div>
   );
 }
 
-const buildClient = (name = 'bob', uuid: String, { target = 'ws://localhost:8878' } = {}) => {
+const buildClient = (name = 'bob', uuid: String, { target = 'ws://localhost:8878' } = {}): SocketWrapper => {
   const socket = new WebSocket(target);
   const authenticate = (msg: any): any => ({ ...msg, token: uuid });
   socket.onopen = event => {
-    socket.send(JSON.stringify(authenticate({ name, message: 'CONNECTED' })));
+    socket.send(JSON.stringify(authenticate({ type: 'system', name, payload: 'CONNECTED' })));
   }
-  const messageHandlers: { (messageHandler: MessageEvent<any>): void; }[] = [];
-  socket.onmessage = (event) => {
+
+  type MessageHandler = (messageHandler: TG2Event) => void;
+
+  let messageHandlers: Map<string, MessageHandler[]> = new Map<string, MessageHandler[]>();
+  socket.onmessage = (event: MessageEvent<any>) => {
     if (event.data === "BEEP") {
       console.log("heartbeat received");
     } else {
-      messageHandlers.forEach(messageHandler => messageHandler(event));
-      const { data: { name, message } } = JSON.parse(event.data.toString());
-      console.log(name, "RECEIVED FROM " + name + ": ", message);
+      console.log("RECV MSG");
+      const { data: { name, payload, type } } = JSON.parse(event.data.toString());
+      const typedHandlers = messageHandlers.get(type) || [];
+      if(typedHandlers.length > 0) {
+        typedHandlers.forEach(handler => handler({type, name, payload}));
+      } else {
+        //LOG DEAD LETTER
+        console.log("DEAD LETTER: " + event.data);
+      }
     }
   }
   return {
-    sendMessage: (message: String) => socket.send(JSON.stringify(authenticate({ name, message }))),
-    addMessageHandler: (messageHandler: (message: MessageEvent<any>) => void) => { messageHandlers.push(messageHandler) }
+    sendMessage: (type: string, payload: string) => socket.send(JSON.stringify(authenticate({ type, name, payload } as TG2Event))),
+    addMessageHandler: (messageHandler: (tg2Event: TG2Event) => void, type: string): void => { // TODO kinda gross
+      if(messageHandlers.get(type) == null) {
+        messageHandlers.set(type, []);
+      }
+      messageHandlers.get(type)?.push(messageHandler);
+    },
+    removeMessageHandler: (messageHandler: (tg2Event: TG2Event) => void, type: string): void => { // TODO kinda gross
+      if(messageHandlers.get(type) != null) {
+        const nextHandlers = messageHandlers.get(type)?.filter(mH => mH !== messageHandler) ?? [];
+        if(nextHandlers.length > 0) {
+          messageHandlers.delete(type);
+        } else {
+          messageHandlers.set(type, nextHandlers);
+        }
+      }
+    }
   }
 };
 

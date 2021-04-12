@@ -1,14 +1,18 @@
 class UserMessage {
-    constructor(name, message) {
-        this.data = { name, message };
+    constructor(type, name, payload) {
+        this.data = { type, name, payload };
+    }
+
+    get type() {
+        return this.data.type;
     }
 
     get name() {
         return this.data.name;
     }
 
-    get message() {
-        return this.data.message;
+    get payload() {
+        return this.data.payload;
     }
 }
 
